@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            width: 500px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            border-radius: 4px;
+        }
+        .edit-btn { background: #28a745; }
+        .delete-btn { background: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <h1>Student Management System</h1>
+
+    <div class="container">
+        <input type="text" id="studentId" placeholder="Student ID">
+        <input type="text" id="studentName" placeholder="Student Name">
+        <input type="number" id="studentAge" placeholder="Age">
+        <input type="text" id="studentCourse" placeholder="Course">
+
+        <button onclick="addStudent()">Add Student</button>
+
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Course</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+<script>
+    function loadStudents() {
+        return JSON.parse(localStorage.getItem("students") || "[]");
+    }
+
+    function saveStudents(students) {
+        localStorage.setItem("students", JSON.stringify(students));
+    }
+
+    function addStudent() {
+        let id = document.getElementById("studentId").value;
+        let name = document.getElementById("studentName").value;
+        let age = document.getElementById("studentAge").value;
+        let course = document.getElementById("studentCourse").value;
+
+        if (!id || !name || !age || !course) {
+            alert("Please fill all fields!");
+            return;
+        }
+
+        let students = loadStudents();
+
+        // Check duplicate ID
+        if (students.some(s => s.id === id)) {
+            alert("Student ID already exists!");
+            return;
+        }
+
+        students.push({ id, name, age, course });
+        saveStudents(students);
+        displayStudents();
+        clearInputs();
+    }
+
+    function clearInputs() {
+        document.getElementById("studentId").value = "";
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentAge").value = "";
+        document.getElementById("studentCourse").value = "";
+    }
+
+    function deleteStudent(id) {
+        let students = loadStudents().filter(s => s.id !== id);
+        saveStudents(students);
+        displayStudents();
+    }
+
+    function editStudent(id) {
+        let students = loadStudents();
+        let student = students.find(s => s.id === id);
+
+        document.getElementById("studentId").value = student.id;
+        document.getElementById("studentName").value = student.name;
+        document.getElementById("studentAge").value = student.age;
+        document.getElementById("studentCourse").value = student.course;
+
+        deleteStudent(id); // Remove old entry
+    }
+
+    function displayStudents() {
+        let students = loadStudents();
+        let tbody = document.querySelector("#studentTable tbody");
+        tbody.innerHTML = "";
+
+        students.forEach(s => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.age}</td>
+                    <td>${s.course}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editStudent('${s.id}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteStudent('${s.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Load on page start
+    displayStudents();
+</script>
+
+</body>
+</html>
